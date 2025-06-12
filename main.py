@@ -133,6 +133,8 @@ async def start_command(message: types.Message):
 Профессиональный бот для сотрудников экстренных служб РФ.
 Быстрый доступ к важной информации в критических ситуациях.
 
+📖 **Подробности миссии:** [Посмотреть](https://telegra.ph/Cifrovoj-pomoshchnik-ehkstrennyh-sluzhb-06-12)
+
 🚑 **Медицина**: расчет дозировок препаратов, противоядия при отравлениях, алгоритмы реанимации
 🚒 **Пожарные**: классификация пожаров, выбор огнетушащих веществ, опасные материалы  
 👮 **Полиция**: статьи УК РФ и КоАП, процедуры задержания, права граждан
@@ -143,6 +145,8 @@ async def start_command(message: types.Message):
 ├ `/dose [лекарство] [вес]` - расчет дозировки препарата  
 ├ `/fire [класс]` - способы тушения пожара
 └ `/law [статья]` - текст статьи закона
+
+💡 **Совет:** Нажмите на команду чтобы скопировать её
 
 Полный справочник команд
 └`/help`
@@ -188,10 +192,12 @@ async def help_command(message: types.Message):
 **🌍 ОБЩИЕ:**
 • `/contacts [служба]` - экстренные контакты
 • `/checklist [тип ЧС]` - алгоритм действий
+
+💡 **Совет:** Нажмите на любую команду чтобы скопировать её
     """
     
     help_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+        [InlineKeyboardButton(text="Главное меню", callback_data="back")]
     ])
     
     await message.answer(help_text, reply_markup=help_keyboard, parse_mode="Markdown")
@@ -204,9 +210,9 @@ async def dose_command(message: types.Message):
         if len(args) < 2:
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="💊 К лекарствам", callback_data="med_dose")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
-            await message.answer("ℹ️ Используйте: `/dose [лекарство] [вес в кг]`\nПример: `/dose адреналин 70`", reply_markup=error_keyboard, parse_mode="Markdown")
+            await message.answer("ℹ️ Используйте: `/dose [лекарство] [вес в кг]`\nПример: `/dose адреналин 70`\n\n💡 **Совет:** Нажмите на команду чтобы скопировать её", reply_markup=error_keyboard, parse_mode="Markdown")
             return
         
         drug = args[0].lower()
@@ -217,22 +223,22 @@ async def dose_command(message: types.Message):
             # Если препарат не найден, выводим ошибку
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="💊 К лекарствам", callback_data="med_dose")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(dose_info, reply_markup=error_keyboard, parse_mode="Markdown")
         else:
             # Препарат найден, показываем дозировку
             dose_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="💊 К лекарствам", callback_data="med_dose")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(f"💊 **Дозировка для {drug.title()}:**\n\n{dose_info}", reply_markup=dose_keyboard, parse_mode="Markdown")
     except (ValueError, IndexError):
         error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="💊 К лекарствам", callback_data="med_dose")],
-            [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+            [InlineKeyboardButton(text="Главное меню", callback_data="back")]
         ])
-        await message.answer("ℹ️ Неверный формат. Используйте: `/dose [лекарство] [вес в кг]`", reply_markup=error_keyboard, parse_mode="Markdown")
+        await message.answer("ℹ️ Неверный формат. Используйте: `/dose [лекарство] [вес в кг]`\n\n💡 **Совет:** Нажмите на команду чтобы скопировать её", reply_markup=error_keyboard, parse_mode="Markdown")
 
 # Информация о ядах и противоядиях
 @dp.message(Command("poison"))
@@ -242,9 +248,9 @@ async def poison_command(message: types.Message):
         if not args:
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="☠️ К противоядиям", callback_data="med_poison")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
-            await message.answer("ℹ️ Используйте: `/poison [название вещества]`\nПример: `/poison мышьяк`", reply_markup=error_keyboard, parse_mode="Markdown")
+            await message.answer("ℹ️ Используйте: `/poison [название вещества]`\nПример: `/poison мышьяк`\n\n💡 **Совет:** Нажмите на команду чтобы скопировать её", reply_markup=error_keyboard, parse_mode="Markdown")
             return
         
         poison = " ".join(args).lower()
@@ -254,21 +260,21 @@ async def poison_command(message: types.Message):
             # Если яд не найден
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="☠️ К ядам", callback_data="med_poison")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(poison_info, reply_markup=error_keyboard, parse_mode="Markdown")
         else:
             # Яд найден, показываем информацию
             poison_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="☠️ К ядам", callback_data="med_poison")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(f"☠️ **{poison.title()}**\n\n{poison_info}", reply_markup=poison_keyboard, parse_mode="Markdown")
             
     except Exception as e:
         error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="☠️ К противоядиям", callback_data="med_poison")],
-            [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+            [InlineKeyboardButton(text="Главное меню", callback_data="back")]
         ])
         await message.answer("ℹ️ Произошла ошибка при поиске информации", reply_markup=error_keyboard, parse_mode="Markdown")
 
@@ -280,9 +286,9 @@ async def fire_command(message: types.Message):
         if not args:
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="🔥 К классам пожаров", callback_data="fire_classes")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
-            await message.answer("ℹ️ Используйте: `/fire [класс]`\nПример: `/fire A` или `/fire электро`", reply_markup=error_keyboard, parse_mode="Markdown")
+            await message.answer("ℹ️ Используйте: `/fire [класс]`\nПример: `/fire A` или `/fire электро`\n\n💡 **Совет:** Нажмите на команду чтобы скопировать её", reply_markup=error_keyboard, parse_mode="Markdown")
             return
         
         fire_class = args[0].upper()
@@ -292,21 +298,21 @@ async def fire_command(message: types.Message):
             # Если класс не найден
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="🔥 К пожарам", callback_data="fire_classes")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(fire_info, reply_markup=error_keyboard, parse_mode="Markdown")
         else:
             # Класс найден
             fire_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="🔥 К пожарам", callback_data="fire_classes")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(f"🔥 **Класс {fire_class.upper()}**\n\n{fire_info}", reply_markup=fire_keyboard, parse_mode="Markdown")
             
     except Exception as e:
         error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🔥 К классам пожаров", callback_data="fire_classes")],
-            [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+            [InlineKeyboardButton(text="Главное меню", callback_data="back")]
         ])
         await message.answer("ℹ️ Произошла ошибка при поиске информации", reply_markup=error_keyboard, parse_mode="Markdown")
 
@@ -318,9 +324,9 @@ async def law_command(message: types.Message):
         if not args:
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="⚖️ К УК РФ", callback_data="police_criminal")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
-            await message.answer("ℹ️ Используйте: `/law [номер статьи]`\nПример: `/law 228`", reply_markup=error_keyboard, parse_mode="Markdown")
+            await message.answer("ℹ️ Используйте: `/law [номер статьи]`\nПример: `/law 228`\n\n💡 **Совет:** Нажмите на команду чтобы скопировать её", reply_markup=error_keyboard, parse_mode="Markdown")
             return
         
         article = args[0]
@@ -330,21 +336,21 @@ async def law_command(message: types.Message):
             # Если статья не найдена
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="⚖️ К УК РФ", callback_data="police_criminal")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(law_info, reply_markup=error_keyboard, parse_mode="Markdown")
         else:
             # Статья найдена
             law_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="⚖️ К УК РФ", callback_data="police_criminal")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(law_info, reply_markup=law_keyboard, parse_mode="Markdown")
             
     except Exception as e:
         error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="⚖️ К УК РФ", callback_data="police_criminal")],
-            [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+            [InlineKeyboardButton(text="Главное меню", callback_data="back")]
         ])
         await message.answer("ℹ️ Произошла ошибка при поиске статьи", reply_markup=error_keyboard, parse_mode="Markdown")
 
@@ -355,10 +361,10 @@ async def admin_command(message: types.Message):
         args = message.text.split()[1:]
         if not args:
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="📋 К КоАП", callback_data="police_admin")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="К КоАП", callback_data="police_admin")],
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
-            await message.answer("ℹ️ Используйте: `/admin [номер статьи]`\nПример: `/admin 20.1`", reply_markup=error_keyboard, parse_mode="Markdown")
+            await message.answer("ℹ️ Используйте: `/admin [номер статьи]`\nПример: `/admin 20.1`\n\n💡 **Совет:** Нажмите на команду чтобы скопировать её", reply_markup=error_keyboard, parse_mode="Markdown")
             return
         
         article = args[0]
@@ -367,22 +373,22 @@ async def admin_command(message: types.Message):
         if admin_info.startswith("ℹ️"):
             # Если статья не найдена
             error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="📋 К КоАП", callback_data="police_admin")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="К КоАП", callback_data="police_admin")],
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(admin_info, reply_markup=error_keyboard, parse_mode="Markdown")
         else:
             # Статья найдена
             admin_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="📋 К КоАП", callback_data="police_admin")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="К КоАП", callback_data="police_admin")],
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             await message.answer(admin_info, reply_markup=admin_keyboard, parse_mode="Markdown")
             
     except Exception as e:
         error_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📋 К КоАП", callback_data="police_admin")],
-            [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+            [InlineKeyboardButton(text="К КоАП", callback_data="police_admin")],
+            [InlineKeyboardButton(text="Главное меню", callback_data="back")]
         ])
         await message.answer("ℹ️ Произошла ошибка при поиске статьи", reply_markup=error_keyboard, parse_mode="Markdown")
 
@@ -393,7 +399,7 @@ async def admin_command(message: types.Message):
 async def ai_symptoms_command(message: types.Message):
     ai_keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🩺 К ИИ меню", callback_data="ai_menu")],
-        [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+        [InlineKeyboardButton(text="Главное меню", callback_data="back")]
     ])
     
     await message.answer(
@@ -406,7 +412,7 @@ async def ai_symptoms_command(message: types.Message):
 async def ai_protocol_command(message: types.Message):
     ai_keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📝 К ИИ меню", callback_data="ai_menu")],
-        [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+        [InlineKeyboardButton(text="Главное меню", callback_data="back")]
     ])
     
     await message.answer(
@@ -419,7 +425,7 @@ async def ai_protocol_command(message: types.Message):
 async def ai_legal_command(message: types.Message):
     ai_keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="⚖️ К ИИ меню", callback_data="ai_menu")],
-        [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+        [InlineKeyboardButton(text="Главное меню", callback_data="back")]
     ])
     
     await message.answer(
@@ -431,8 +437,8 @@ async def ai_legal_command(message: types.Message):
 @dp.message(Command("ai_checklist"))
 async def ai_checklist_command(message: types.Message):
     ai_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📋 К ИИ меню", callback_data="ai_menu")],
-        [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+        [InlineKeyboardButton(text="К ИИ меню", callback_data="ai_menu")],
+        [InlineKeyboardButton(text="Главное меню", callback_data="back")]
     ])
     
     await message.answer(
@@ -487,7 +493,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
         police_keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [
                 InlineKeyboardButton(text="⚖️ УК РФ", callback_data="police_criminal"),
-                InlineKeyboardButton(text="📋 КоАП", callback_data="police_admin")
+                InlineKeyboardButton(text="КоАП", callback_data="police_admin")
             ],
             [
                 InlineKeyboardButton(text="🛡️ Права граждан", callback_data="police_rights"),
@@ -540,7 +546,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             dose_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К медицине", callback_data="med")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -551,7 +557,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             poison_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К медицине", callback_data="med")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -562,7 +568,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             resus_info,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К медицине", callback_data="med")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -593,7 +599,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             algo_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К медицине", callback_data="med")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -605,7 +611,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             fire_classes_info,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К пожарным", callback_data="fire")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -635,7 +641,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             extinguish_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К пожарным", callback_data="fire")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -665,7 +671,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             hazmat_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К пожарным", callback_data="fire")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -703,7 +709,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             evac_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К пожарным", callback_data="fire")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -715,7 +721,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             criminal_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К полиции", callback_data="police")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -745,7 +751,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             rights_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К полиции", callback_data="police")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -756,7 +762,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             admin_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К полиции", callback_data="police")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -796,7 +802,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             protocols_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К полиции", callback_data="police")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -809,7 +815,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             ],
             [
                 InlineKeyboardButton(text="⚖️ Правовая консультация", callback_data="ai_legal_menu"),
-                InlineKeyboardButton(text="📋 Чек-лист ЧС", callback_data="ai_checklist_menu")
+                InlineKeyboardButton(text="Чек-лист ЧС", callback_data="ai_checklist_menu")
             ],
             [InlineKeyboardButton(text="Назад", callback_data="back")]
         ])
@@ -825,7 +831,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             "🚧 **ИИ Анализ симптомов - в разработке**\n\nДанная функция будет доступна в следующем обновлении.\n\nВ разработке:\n• Анализ описания симптомов\n• Предварительная диагностика\n• Оценка степени срочности\n• Рекомендации по первой помощи\n\nПока используйте стандартные медицинские алгоритмы.",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К ИИ меню", callback_data="ai_menu")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -835,7 +841,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             "🚧 **ИИ Генерация протокола - в разработке**\n\nДанная функция будет доступна в следующем обновлении.\n\nВ разработке:\n• Автоматическое создание протоколов\n• Соответствие требованиям законодательства\n• Шаблоны для разных типов происшествий\n• Проверка правильности оформления\n\nПока используйте стандартные шаблоны.",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К ИИ меню", callback_data="ai_menu")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -845,7 +851,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             "🚧 **ИИ Правовая консультация - в разработке**\n\nДанная функция будет доступна в следующем обновлении.\n\nВ разработке:\n• Консультации по законодательству\n• Ссылки на актуальные статьи\n• Разъяснение процедур\n• Помощь в сложных случаях\n\nПока используйте базу статей УК РФ и КоАП.",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К ИИ меню", callback_data="ai_menu")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -855,7 +861,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             "🚧 **ИИ Чек-лист ЧС - в разработке**\n\nДанная функция будет доступна в следующем обновлении.\n\nВ разработке:\n• Персонализированные чек-листы\n• Адаптация под тип ЧС\n• Пошаговые инструкции\n• Контроль выполнения действий\n\nПока используйте алгоритмы в разделах служб.",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К ИИ меню", callback_data="ai_menu")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -896,7 +902,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             search_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К спасателям", callback_data="rescue")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -939,7 +945,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             survival_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К спасателям", callback_data="rescue")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -981,7 +987,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             weather_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К спасателям", callback_data="rescue")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -1024,7 +1030,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             comms_text,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="К спасателям", callback_data="rescue")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ]),
             parse_mode="Markdown"
         )
@@ -1077,7 +1083,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             
             admin_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="🔄 Обновить", callback_data="admin_panel")],
-                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                [InlineKeyboardButton(text="Главное меню", callback_data="back")]
             ])
             
             await callback.message.edit_text(
@@ -1090,7 +1096,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
             await callback.message.edit_text(
                 "❌ **Ошибка получения статистики**\n\nПопробуйте позже или обратитесь к разработчику.",
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                    [InlineKeyboardButton(text="Главное меню", callback_data="back")]
                 ]),
                 parse_mode="Markdown"
             )
@@ -1102,6 +1108,8 @@ async def handle_callbacks(callback: types.CallbackQuery):
 Профессиональный бот для сотрудников экстренных служб РФ.
 Быстрый доступ к важной информации в критических ситуациях.
 
+📖 **Подробности миссии:** [Посмотреть](https://telegra.ph/Cifrovoj-pomoshchnik-ehkstrennyh-sluzhb-06-12)
+
 🚑 **Медицина**: расчет дозировок препаратов, противоядия при отравлениях, алгоритмы реанимации
 🚒 **Пожарные**: классификация пожаров, выбор огнетушащих веществ, опасные материалы  
 👮 **Полиция**: статьи УК РФ и КоАП, процедуры задержания, права граждан
@@ -1112,6 +1120,8 @@ async def handle_callbacks(callback: types.CallbackQuery):
 ├ `/dose [лекарство] [вес]` - расчет дозировки препарата  
 ├ `/fire [класс]` - способы тушения пожара
 └ `/law [статья]` - текст статьи закона
+
+💡 **Совет:** Нажмите на команду чтобы скопировать её
 
 Полный справочник команд
 └`/help`
@@ -1141,8 +1151,8 @@ async def set_bot_commands():
         BotCommand(command="ai_symptoms", description="🤖 ИИ анализ симптомов"),
         BotCommand(command="ai_protocol", description="📝 ИИ генерация протокола"),
         BotCommand(command="ai_legal", description="⚖️ ИИ правовая консультация"),
-        BotCommand(command="ai_checklist", description="📋 ИИ чек-лист ЧС"),
-        BotCommand(command="admin", description="📋 Статьи КоАП РФ"),
+        BotCommand(command="ai_checklist", description="ИИ чек-лист ЧС"),
+        BotCommand(command="admin", description="Статьи КоАП РФ"),
     ]
     
     await bot.set_my_commands(commands)
