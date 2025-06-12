@@ -1,0 +1,37 @@
+[Unit]
+Description=112help - Помощник экстренных служб
+Documentation=https://github.com/kitay-sudo/112help
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=112help
+Group=112help
+WorkingDirectory=/opt/112help
+ExecStart=/usr/bin/python3 /opt/112help/main.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=112help
+
+# Настройки безопасности
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+DevicePolicy=closed
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/112help/logs
+ReadOnlyPaths=/opt/112help
+
+# Переменные окружения
+Environment=PYTHONPATH=/opt/112help
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target 
