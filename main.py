@@ -8,7 +8,6 @@ from aiogram.filters import Command
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
 from data.emergency_data import EmergencyData
-from ai_assistant import AIAssistant
 import os
 from dotenv import load_dotenv
 import re
@@ -39,15 +38,24 @@ bot = Bot(
 )
 dp = Dispatcher()
 
-# Инициализация базы данных и ИИ помощника
+# Инициализация данных
 emergency_data = EmergencyData()
-ai_assistant = AIAssistant()
 
 # === АНТИСПАМ СИСТЕМА ===
 user_requests = defaultdict(list)
 MAX_REQUESTS_PER_MINUTE = 30
 SPAM_BAN_DURATION = 300  # 5 минут бана
 banned_users = {}
+
+# Получение списка админов
+ADMIN_IDS = []
+admin_ids_str = os.getenv('ADMIN_IDS', '')
+if admin_ids_str:
+    ADMIN_IDS = [int(id_str.strip()) for id_str in admin_ids_str.split(',') if id_str.strip()]
+
+def is_admin(user_id: int) -> bool:
+    """Проверка является ли пользователь администратором"""
+    return user_id in ADMIN_IDS
 
 def is_user_banned(user_id: int) -> bool:
     """Проверка бана пользователя"""
@@ -94,8 +102,8 @@ async def anti_spam_middleware(handler, event: Message, data):
     return await handler(event, data)
 
 # Главное меню
-def get_main_menu():
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+def get_main_menu(user_id: int = None):
+    keyboard = [
         [
             InlineKeyboardButton(text="🚑 Медицина", callback_data="med"),
             InlineKeyboardButton(text="🚒 Пожарные", callback_data="fire")
@@ -105,19 +113,22 @@ def get_main_menu():
             InlineKeyboardButton(text="🆘 Спасатели", callback_data="rescue")
         ],
         [
-            InlineKeyboardButton(text="📞 Контакты", callback_data="contacts")
-        ],
-        [
-            InlineKeyboardButton(text="ИИ Помощник", callback_data="ai_menu")
+            InlineKeyboardButton(text="📞 Контакты", callback_data="contacts"),
+            InlineKeyboardButton(text="🤖 ИИ Помощник", callback_data="ai_menu")
         ]
-    ])
-    return keyboard
+    ]
+    
+    # Добавляем кнопку админки для администраторов
+    if user_id and is_admin(user_id):
+        keyboard.append([InlineKeyboardButton(text="🔧 Админка", callback_data="admin_panel")])
+    
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 # Стартовая команда
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
     welcome_text = """
-🚨 **EmergencyBot - Помощник экстренных служб** 🚨
+🚨 **112help - Помощник экстренных служб** 🚨
 
 Профессиональный бот для сотрудников экстренных служб РФ.
 Быстрый доступ к важной информации в критических ситуациях.
@@ -128,12 +139,13 @@ async def start_command(message: types.Message):
 🆘 **Спасатели**: методы поиска людей, время выживания, влияние погоды на операции
 
 **Основные команды:**
-• `/poison [название]` - противоядие при отравлении
-• `/dose [лекарство] [вес]` - расчет дозировки препарата  
-• `/fire [класс]` - способы тушения пожара
-• `/law [статья]` - текст статьи закона
-• `/coords` - определение GPS координат
-• `/help` - полный справочник команд
+├ `/poison [название]` - противоядие при отравлении
+├ `/dose [лекарство] [вес]` - расчет дозировки препарата  
+├ `/fire [класс]` - способы тушения пожара
+└ `/law [статья]` - текст статьи закона
+
+Полный справочник команд
+└`/help`
 
 **Разработчик:** @kitay9
 **Версия:** 2.0 | **Статус:** Активная разработка
@@ -141,7 +153,7 @@ async def start_command(message: types.Message):
     
     await message.answer(
         welcome_text, 
-        reply_markup=get_main_menu(),
+        reply_markup=get_main_menu(message.from_user.id),
         parse_mode="Markdown"
     )
 
@@ -1017,9 +1029,75 @@ async def handle_callbacks(callback: types.CallbackQuery):
             parse_mode="Markdown"
         )
     
+    elif callback.data == "admin_panel":
+        # Проверка прав администратора
+        if not is_admin(callback.from_user.id):
+            await callback.answer("❌ У вас нет прав доступа к админ панели", show_alert=True)
+            return
+        
+        try:
+            stats = await User.get_user_stats()
+            
+            if stats.get('demo'):
+                admin_text = f"""
+🔧 **Админ панель 112help**
+
+⚠️ **ДЕМО РЕЖИМ - База данных отключена**
+
+📊 **Статистика пользователей:**
+• **Всего пользователей:** {stats['total']} (демо)
+• **Активных сегодня:** {stats['active_today']} (демо)
+• **Активных за неделю:** {stats['active_week']} (демо)
+• **Новых сегодня:** {stats['new_today']} (демо)
+• **Заблокированных:** {stats['blocked']} (демо)
+
+💡 **Для реальной статистики подключите MongoDB:**
+• Локально: установите MongoDB
+• Облачно: создайте MongoDB Atlas
+
+⚙️ **Система работает в демо режиме**
+                """
+            else:
+                admin_text = f"""
+🔧 **Админ панель 112help**
+
+📊 **Статистика пользователей:**
+• **Всего пользователей:** {stats['total']}
+• **Активных сегодня:** {stats['active_today']}
+• **Активных за неделю:** {stats['active_week']}
+• **Новых сегодня:** {stats['new_today']}
+• **Заблокированных:** {stats['blocked']}
+
+📈 **Активность:**
+• **Сегодня:** {stats['active_today']} из {stats['total']} ({(stats['active_today']/stats['total']*100) if stats['total'] > 0 else 0:.1f}%)
+• **За неделю:** {stats['active_week']} из {stats['total']} ({(stats['active_week']/stats['total']*100) if stats['total'] > 0 else 0:.1f}%)
+
+⚙️ **Система работает стабильно**
+                """
+            
+            admin_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="🔄 Обновить", callback_data="admin_panel")],
+                [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+            ])
+            
+            await callback.message.edit_text(
+                admin_text,
+                reply_markup=admin_keyboard,
+                parse_mode="Markdown"
+            )
+            
+        except Exception as e:
+            await callback.message.edit_text(
+                "❌ **Ошибка получения статистики**\n\nПопробуйте позже или обратитесь к разработчику.",
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="📋 Главное меню", callback_data="back")]
+                ]),
+                parse_mode="Markdown"
+            )
+    
     elif callback.data == "back":
         welcome_text = """
-🚨 **EmergencyBot - Помощник экстренных служб** 🚨
+🚨 **112help - Помощник экстренных служб** 🚨
 
 Профессиональный бот для сотрудников экстренных служб РФ.
 Быстрый доступ к важной информации в критических ситуациях.
@@ -1030,12 +1108,13 @@ async def handle_callbacks(callback: types.CallbackQuery):
 🆘 **Спасатели**: методы поиска людей, время выживания, влияние погоды на операции
 
 **Основные команды:**
-• `/poison [название]` - противоядие при отравлении
-• `/dose [лекарство] [вес]` - расчет дозировки препарата  
-• `/fire [класс]` - способы тушения пожара
-• `/law [статья]` - текст статьи закона
+├ `/poison [название]` - противоядие при отравлении
+├ `/dose [лекарство] [вес]` - расчет дозировки препарата  
+├ `/fire [класс]` - способы тушения пожара
+└ `/law [статья]` - текст статьи закона
 
-• `/help` - полный справочник команд
+Полный справочник команд
+└`/help`
 
 **Разработчик:** @kitay9
 **Версия:** 2.0 | **Статус:** Активная разработка
@@ -1043,7 +1122,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
         
         await callback.message.edit_text(
             welcome_text,
-            reply_markup=get_main_menu(),
+            reply_markup=get_main_menu(callback.from_user.id),
             parse_mode="Markdown"
         )
     
@@ -1070,7 +1149,10 @@ async def set_bot_commands():
 
 # Основная функция
 async def main():
-    logger.info("Запуск EmergencyBot...")
+    logger.info("Запуск 112help...")
+    
+    # Инициализация базы данных
+    await Database.connect()
     
     # Установка команд
     await set_bot_commands()

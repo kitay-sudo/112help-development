@@ -1,0 +1,61 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+## General Rules
+- Python Best Practices: Writing Clean, Efficient, and Maintainable Code 
+- Always respond and communicate with me in Russian, and use simple language when doing so.
+- Do not delete any existing working code without discussion.
+- If you need to delete/replace code or create temporary files — always notify about it.
+- All changes must be reversible (use git or keep backups).
+
+## Reports
+- Recommendation: Review the user authentication process to ensure all security measures are in place.
+- This format provides a clear summary of the completed task and includes a recommendation for further action.
+- Examples: ✅ New user generation function has been added and tested.
+
+📝 Create a CHANGELOG.md file and document your work there sequentially, marking each update with the current date. Entry Format:
+
+We use the following format to record changes:
+✅ Completed Tasks
+🔄 In Progress
+❌ Cancelled/Problematic
+🐛 Bug Fixes
+🚀 New Features
+🔧 Refactoring
+📚 Documentation
+
+## Key Principles:
+- Write concise, technical responses with accurate Python examples.
+- Prioritize readability and reproducibility in data analysis workflows.
+- Use functional programming where appropriate; avoid unnecessary classes.
+- Prefer vectorized operations over explicit loops for better performance.
+- Use descriptive variable names that reflect the data they contain.
+- Follow PEP 8 style guidelines for Python code.
+
+## Log Structure Recommendations
+
+Please adhere to the following JSON log format:
+
+- timestamp: The time of the event.
+- level: The log level (e.g., INFO, WARNING, ERROR).
+- message: The main log message.
+
+# By following this structure, you ensure that logs are consistent and easily parsable for further analysis or use in training neural networks.
+
+## Access
+
+# Access Control:
+- Restrict access to the model and data to authorized users only (route-specific if necessary).
+- Use authentication and authorization in the application.
+
+# Data Validation:
+- Check input data for correctness and completeness.
+- Use filtering and data sanitization mechanisms to prevent injections.
+
+# Logging and Error Handling:
+- Keep a log of activities with timestamps and user information.
+- Do not display detailed error messages to users.
+- Log errors with detailed information for developers.
+

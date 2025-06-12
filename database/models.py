@@ -1,5 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 
@@ -8,13 +8,40 @@ load_dotenv()
 class Database:
     client = None
     db = None
+    connected = False
 
     @classmethod
     async def connect_to_mongo(cls):
         """Подключение к MongoDB"""
-        cls.client = AsyncIOMotorClient(os.getenv("MONGODB_URI"))
-        cls.db = cls.client.emergency_bot
-        print("✅ Подключение к MongoDB установлено")
+        try:
+            mongodb_url = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+            database_name = os.getenv("DATABASE_NAME", "emergency_bot")
+            
+            # Проверяем, не отключена ли БД для тестирования
+            if mongodb_url.lower() == "disabled":
+                print("⚠️  База данных отключена (MONGODB_URL=disabled)")
+                print("⚠️  Статистика и пользователи не сохраняются")
+                cls.connected = False
+                return
+            
+            cls.client = AsyncIOMotorClient(mongodb_url, serverSelectionTimeoutMS=5000)
+            # Проверяем подключение
+            await cls.client.admin.command('ping')
+            cls.db = cls.client[database_name]
+            cls.connected = True
+            print(f"✅ Подключение к MongoDB установлено: {mongodb_url}")
+            print(f"✅ Используется база данных: {database_name}")
+            
+        except Exception as e:
+            print(f"❌ Ошибка подключения к MongoDB: {e}")
+            print("⚠️  Бот будет работать без базы данных")
+            print("⚠️  Статистика и пользователи не сохраняются")
+            cls.connected = False
+
+    @classmethod
+    async def connect(cls):
+        """Алиас для connect_to_mongo() для совместимости"""
+        await cls.connect_to_mongo()
 
     @classmethod
     async def close_mongo_connection(cls):
@@ -152,7 +179,46 @@ class User:
         except Exception as e:
             print(f"❌ Ошибка добавления предупреждения: {e}")
 
-
+    @staticmethod
+    async def get_user_stats():
+        """Получение статистики пользователей для админов"""
+        # Если БД не подключена, возвращаем демо-данные
+        if not Database.connected:
+            return {
+                "total": 0,
+                "blocked": 0, 
+                "active_today": 0,
+                "active_week": 0,
+                "new_today": 0,
+                "demo": True
+            }
+        
+        try:
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            week_ago = today - timedelta(days=7)
+            
+            total_users = await Database.db.users.count_documents({})
+            blocked_users = await Database.db.users.count_documents({"is_blocked": True})
+            active_today = await Database.db.users.count_documents({
+                "last_activity": {"$gte": today}
+            })
+            active_week = await Database.db.users.count_documents({
+                "last_activity": {"$gte": week_ago}
+            })
+            new_today = await Database.db.users.count_documents({
+                "registration_date": {"$gte": today}
+            })
+            
+            return {
+                "total": total_users,
+                "blocked": blocked_users,
+                "active_today": active_today,
+                "active_week": active_week,
+                "new_today": new_today
+            }
+        except Exception as e:
+            print(f"❌ Ошибка получения статистики: {e}")
+            return {"total": 0, "blocked": 0, "active_today": 0, "active_week": 0, "new_today": 0}
 
 class CommandLog:
     """Модель для логирования команд"""
