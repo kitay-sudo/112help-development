@@ -89,15 +89,52 @@ def check_rate_limit(user_id: int) -> bool:
 async def anti_spam_middleware(handler, event: Message, data):
     user_id = event.from_user.id
     
-    # Проверка бана
+    # Регистрация пользователя (создание или обновление активности)
+    try:
+        user = await User.get_or_create_user(
+            user_id=user_id,
+            username=event.from_user.username,
+            first_name=event.from_user.first_name,
+            last_name=event.from_user.last_name
+        )
+        if user:
+            await user.update_activity()
+    except Exception as e:
+        logger.error(f"Ошибка регистрации пользователя {user_id}: {e}")
+    
+    # Проверка на блокировку
     if is_user_banned(user_id):
-        await event.answer("⏰ **Превышен лимит запросов**\n\nВы временно заблокированы за слишком частые запросы. Попробуйте через несколько минут.", parse_mode="Markdown")
+        await event.answer("🚫 Вы заблокированы за нарушение правил использования бота.")
         return
     
-    # Проверка лимита
+    # Rate limiting
     if not check_rate_limit(user_id):
-        await event.answer("⚠️ **Слишком много запросов**\n\nВы отправляете запросы слишком часто. Подождите немного перед следующим запросом.", parse_mode="Markdown")
+        await event.answer("⏳ Слишком много запросов. Подождите немного.")
         return
+    
+    # Логирование команды
+    command = event.text.split()[0] if event.text else "unknown"
+    log_user_action(user_id, command)
+    
+    # Продолжение обработки
+    return await handler(event, data)
+
+@dp.callback_query.middleware() 
+async def callback_middleware(handler, event, data):
+    user_id = event.from_user.id
+    
+    # Регистрация пользователя при нажатии кнопок
+    try:
+        user = await User.get_or_create_user(
+            user_id=user_id,
+            username=event.from_user.username,
+            first_name=event.from_user.first_name,
+            last_name=event.from_user.last_name
+        )
+        if user:
+            await user.update_activity()
+    except Exception as e:
+        logger.error(f"Ошибка регистрации пользователя {user_id}: {e}")
     
     return await handler(event, data)
 
@@ -128,7 +165,7 @@ def get_main_menu(user_id: int = None):
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
     welcome_text = """
-🚨 **112help - Помощник экстренных служб** 🚨
+🚨 **Помощник экстренных служб**
 
 Профессиональный бот для сотрудников экстренных служб РФ.
 Быстрый доступ к важной информации в критических ситуациях.
@@ -1043,29 +1080,37 @@ async def handle_callbacks(callback: types.CallbackQuery):
         
         try:
             stats = await User.get_user_stats()
+            storage_type = stats.get('storage_type', 'unknown')
             
-            if stats.get('demo'):
+            # Определяем тип хранилища для отображения
+            if storage_type == 'mongodb':
+                storage_info = "💾 **MongoDB подключена**"
+                additional_info = "⚙️ **Система работает стабильно**"
+            elif storage_type == 'json_backup':
+                storage_info = "📂 **JSON резерв (MongoDB недоступна)**"
+                additional_info = "💡 **Проверьте подключение к MongoDB**"
+            elif storage_type == 'text_file':
+                storage_info = "📄 **Текстовое хранилище (users.txt)**"
+                additional_info = """💡 **Для переключения на MongoDB:**
+• Установите: `USE_MONGODB=true` в .env
+• Настройте: `MONGODB_URL=mongodb://localhost:27017`"""
+            else:
+                storage_info = "❌ **Ошибка хранилища**"
+                additional_info = "Попробуйте перезапустить бота"
+            
+            if stats.get('error'):
                 admin_text = f"""
 🔧 **Админ панель 112help**
 
-⚠️ **ДЕМО РЕЖИМ - База данных отключена**
+❌ **Ошибка получения статистики**
 
-📊 **Статистика пользователей:**
-• **Всего пользователей:** {stats['total']} (демо)
-• **Активных сегодня:** {stats['active_today']} (демо)
-• **Активных за неделю:** {stats['active_week']} (демо)
-• **Новых сегодня:** {stats['new_today']} (демо)
-• **Заблокированных:** {stats['blocked']} (демо)
-
-💡 **Для реальной статистики подключите MongoDB:**
-• Локально: установите MongoDB
-• Облачно: создайте MongoDB Atlas
-
-⚙️ **Система работает в демо режиме**
+Попробуйте позже или проверьте подключение к базе данных.
                 """
             else:
                 admin_text = f"""
 🔧 **Админ панель 112help**
+
+{storage_info}
 
 📊 **Статистика пользователей:**
 • **Всего пользователей:** {stats['total']}
@@ -1078,7 +1123,7 @@ async def handle_callbacks(callback: types.CallbackQuery):
 • **Сегодня:** {stats['active_today']} из {stats['total']} ({(stats['active_today']/stats['total']*100) if stats['total'] > 0 else 0:.1f}%)
 • **За неделю:** {stats['active_week']} из {stats['total']} ({(stats['active_week']/stats['total']*100) if stats['total'] > 0 else 0:.1f}%)
 
-⚙️ **Система работает стабильно**
+{additional_info}
                 """
             
             admin_keyboard = InlineKeyboardMarkup(inline_keyboard=[

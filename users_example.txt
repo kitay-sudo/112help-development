@@ -1,0 +1,1 @@
+﻿# Формат: user_id|username|first_name|last_name|registration_date|last_activity|command_count|is_blocked
